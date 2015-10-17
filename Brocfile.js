@@ -6,6 +6,8 @@ var transpileES6 = require('broccoli-babel-transpiler');
 var jshintTree = require('broccoli-jshint');
 var replace    = require('broccoli-string-replace');
 var gitVersion = require('git-repo-version');
+var browserify = require('broccoli-browserify');
+var writeFile = require('broccoli-file-creator');
 
 // extract version from git
 // note: remove leading `v` (since by default our tags use a `v` prefix)
@@ -147,6 +149,24 @@ var testIndex = new Funnel('test', {
   destDir: '/tests'
 });
 
+function generateNpmStubs(moduleNames) {
+  return moduleNames.map(function(moduleName){
+    return "define('npm:" +
+      moduleName +
+      "', function(){ return { 'default': require('" +
+      moduleName +
+      "')};})";
+  }).join("\n");
+}
+
+var browserifyExports = writeFile('/browserify-exports.js', generateNpmStubs(['rethinkdb']));
+
+var testNpmModules = browserify(browserifyExports, {
+  entries: ['./browserify-exports.js'],
+  outputFile: '/assets/test-npm-modules.js'
+});
+
+
 module.exports = mergeTrees([loader, globalizedLoader, allMain,
   allGlobalized, mainWithTests, vendor, qunit, testSupport, testIndex,
-  generatedBowerConfig, buildExtras]);
+  generatedBowerConfig, buildExtras, testNpmModules]);
