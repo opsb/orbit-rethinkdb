@@ -1,0 +1,51 @@
+{
+  "name": "orbit-rethinkdb",
+  "private": true,
+  "version": "0.1.0",
+  "namespace": "OF",
+  "description": "rethinkdb adapter for orbit.js",
+  "homepage": "https://github.com/opsb/orbit-rethinkdb.js",
+  "readmeFilename": "README.md",
+  "author": {
+    "name": "Oliver Searle-Barnes",
+    "url": "http://github.com/opsb"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/opsb/orbit-rethinkdb.git"
+  },
+  "bugs": {
+    "url": "https://github.com/opsb/orbit-rethinkdb/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/opsb/orbit-rethinkdb/blob/master/LICENSE"
+    }
+  ],
+  "main": "Brocfile.js",
+  "scripts": {
+    "postinstall": "bower install",
+    "build": "rm -rf build && BROCCOLI_ENV=test broccoli build build",
+    "prepublish": "bower install",
+    "pretest": "npm run build",
+    "test": "testem ci",
+    "start": "BROCCOLI_ENV=test broccoli serve",
+    "release": "./scripts/release"
+  },
+  "devDependencies": {
+    "bower": "^1.3.12",
+    "broccoli": "^0.13.0",
+    "broccoli-babel-transpiler": "^4.0.1",
+    "broccoli-cli": "0.0.1",
+    "broccoli-es6modules": "^0.4.0",
+    "broccoli-funnel": "^0.1.6",
+    "broccoli-jshint": "^0.5.3",
+    "broccoli-merge-trees": "^0.1.4",
+    "broccoli-sourcemap-concat": "^0.4.3",
+    "broccoli-string-replace": "0.0.2",
+    "git-repo-version": "^0.1.1",
+    "broccoli-babel-transpiler": "^5.4.5",
+    "testem": "^0.7.6"
+  }
+}

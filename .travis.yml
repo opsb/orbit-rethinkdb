@@ -1,0 +1,16 @@
+sudo: false
+language: node_js
+
+before_install:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+
+install:
+  - npm install
+  - bower install
+
+script:
+  - npm test
+
+notifications:
+  slack: lytbulb:tPkbeehYqq8eGO7eYsDap74P
