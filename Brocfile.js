@@ -159,7 +159,10 @@ function generateNpmStubs(moduleNames) {
   }).join("\n");
 }
 
-var browserifyExports = writeFile('/browserify-exports.js', generateNpmStubs(['rethinkdb']));
+var browserifyExports = writeFile('/browserify-exports.js', generateNpmStubs([
+  'rethinkdb',
+  'rethinkdb-websocket-client'
+]));
 
 var testNpmModules = browserify(browserifyExports, {
   entries: ['./browserify-exports.js'],
