@@ -2,14 +2,14 @@ import RethinkdbSource from 'orbit-rethinkdb/rethinkdb-source';
 import rethinkdb from 'npm:rethinkdb';
 let source;
 
-module('Integration - RethinkdbSource', {
-  setup() {
+QUnit.module('Integration - RethinkdbSource', {
+  beforeEach() {
     source = new RethinkdbSource();
   }
 });
 
-test('can emit changes from a changefeed', function() {
-  ok(RethinkdbSource);
-  ok(`hello ES6`);
-  ok(rethinkdb);
+QUnit.test('can emit changes from a changefeed', function(assert) {
+  assert.ok(RethinkdbSource);
+  assert.ok(`hello ES6`);
+  assert.ok(rethinkdb);
 });

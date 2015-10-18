@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "jquery": "~1.11.1",
-    "qunit": "~1.17.1",
+    "qunit": "1.19.0",
     "rsvp": "~3.0.16",
     "loader": "stefanpenner/loader.js#1.0.1"
   }
