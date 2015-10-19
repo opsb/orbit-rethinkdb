@@ -2,7 +2,8 @@ import RethinkdbWebsocketClient from 'npm:rethinkdb-websocket-client';
 const r = RethinkdbWebsocketClient.rethinkdb;
 
 const tableNames = [
-  'messages'
+  'messages',
+  'chat_rooms'
 ];
 
 const options = {
@@ -38,15 +39,16 @@ function clearSchema(conn) {
 let rethinkdbInitialized = false;
 
 function setupRethinkdb() {
-  if(rethinkdbInitialized) return Promise.resolve();
 
   return connection().then((conn) => {
+    if(rethinkdbInitialized) return Promise.resolve(conn);
+
     return dropDatabase(conn)
       .then(() => { return createDatabase(conn); })
       .then(() => { return createSchema(conn); })
       .then(() => {
         rethinkdbInitialized = true;
-        return;
+        return conn;
       });
   });
 }

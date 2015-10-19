@@ -16,7 +16,7 @@ var version = gitVersion().replace(/^v/, '');
 var packages = [
   {
     name: 'orbit-rethinkdb',
-    include: [/orbit-rethinkdb\/rethinkdb-source.js/]
+    include: [/orbit-rethinkdb\/.*.js/]
   }
 ];
 
