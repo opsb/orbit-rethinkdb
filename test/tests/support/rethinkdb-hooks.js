@@ -3,7 +3,7 @@ const r = RethinkdbWebsocketClient.rethinkdb;
 
 const tableNames = [
   'messages',
-  'chat_rooms'
+  'chat_rooms',
 ];
 
 const options = {
@@ -17,7 +17,7 @@ const options = {
 
 function dropDatabase(conn) {
   return r.dbList().run(conn).then((dbs) => {
-    if(dbs.indexOf(options.db) === -1) return;
+    if (dbs.indexOf(options.db) === -1) return;
     return r.dbDrop(options.db).run(conn);
   });
 }
@@ -43,7 +43,7 @@ let rethinkdbInitialized = false;
 function setupRethinkdb() {
 
   return connection().then((conn) => {
-    if(rethinkdbInitialized) return Promise.resolve(conn);
+    if (rethinkdbInitialized) return Promise.resolve(conn);
 
     return dropDatabase(conn)
       .then(() => { return createDatabase(conn); })
@@ -63,7 +63,7 @@ function teardownRethinkdb() {
 
 let conn = null;
 function connection() {
-  if(conn) Promise.resolve(conn);
+  if (conn) Promise.resolve(conn);
 
   return RethinkdbWebsocketClient.connect(options).then((_conn) => {
     conn = _conn;

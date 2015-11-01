@@ -49,12 +49,12 @@ const r = RethinkdbWebsocketClient.rethinkdb;
 
 const {skip} = QUnit;
 
-let conn,
-    transformer,
-    serializer,
-    finder;
+let conn;
+let transformer;
+let serializer;
+let finder;
 
-function buildRecord(...args){
+function buildRecord(...args) {
   return serializer.deserialize(...args);
 }
 
@@ -109,6 +109,7 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
   test('can add record with hasMany', function(assert) {
     const done = assert.async();
     const message = buildRecord('message', {id: 1, body: 'hello'});
+
     // todo - buildRecord doesn't handle hasManys
     const chatRoom = buildRecord('chatRoom', {id: 1, name: 'room2'});
     chatRoom.relationships.messages.data = {'message:1': true};
@@ -146,7 +147,7 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
       [
         addRecordOperation(chatRoom),
         addRecordOperation(message),
-        addHasOneOperation(message, 'chatRoom', chatRoom)
+        addHasOneOperation(message, 'chatRoom', chatRoom),
       ],
       operation => transformer.transform(new Transform([operation]))
     )
@@ -166,7 +167,7 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
       [
         addRecordOperation(chatRoom),
         addRecordOperation(message),
-        replaceHasOneOperation(message, 'chatRoom', chatRoom)
+        replaceHasOneOperation(message, 'chatRoom', chatRoom),
       ],
       operation => transformer.transform(new Transform([operation]))
     )
@@ -187,7 +188,7 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
         addRecordOperation(chatRoom),
         addRecordOperation(message),
         addHasOneOperation(message, 'chatRoom', chatRoom),
-        removeHasOneOperation(message, 'chatRoom')
+        removeHasOneOperation(message, 'chatRoom'),
       ],
       operation => transformer.transform(new Transform([operation]))
     )
@@ -207,7 +208,7 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
       [
         addRecordOperation(chatRoom),
         addRecordOperation(message),
-        addToRelationshipOperation(chatRoom, 'messages', message)
+        addToRelationshipOperation(chatRoom, 'messages', message),
       ],
       operation => transformer.transform(new Transform([operation]))
     )
@@ -231,7 +232,7 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
         addRecordOperation(message1),
         addRecordOperation(message2),
         addRecordOperation(message3),
-        replaceRelationshipOperation(chatRoom, 'messages', [message2, message3])
+        replaceRelationshipOperation(chatRoom, 'messages', [message2, message3]),
       ],
       operation => transformer.transform(new Transform([operation]))
     )
@@ -258,7 +259,7 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
         addRecordOperation(chatRoom),
         addRecordOperation(message),
         addToRelationshipOperation(chatRoom, 'messages', message),
-        removeFromRelationshipOperation(chatRoom, 'messages', message)
+        removeFromRelationshipOperation(chatRoom, 'messages', message),
       ],
       operation => transformer.transform(new Transform([operation]))
     )

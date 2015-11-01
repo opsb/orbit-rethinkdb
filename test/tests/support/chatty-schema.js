@@ -4,19 +4,19 @@ export default new Schema({
   models: {
     message: {
       attributes: {
-        body: {type: 'string'}
+        body: {type: 'string'},
       },
       relationships: {
-        chatRoom: {type: 'hasOne', model: 'chatRoom', inverse: 'messages'}
-      }
+        chatRoom: {type: 'hasOne', model: 'chatRoom', inverse: 'messages'},
+      },
     },
     chatRoom: {
       attributes: {
-        name: {type: 'string'}
+        name: {type: 'string'},
       },
       relationships: {
-        messages: {type: 'hasMany', model: 'message', inverse: 'chatRoom'}
-      }
-    }
-  }
+        messages: {type: 'hasMany', model: 'message', inverse: 'chatRoom'},
+      },
+    },
+  },
 });
