@@ -33,7 +33,9 @@ function createSchema(conn) {
 }
 
 function clearSchema(conn) {
-  return r.db(options.db).table('messages').delete().run(conn);
+  return Promise.all(tableNames.map((tableName) => {
+    return r.db(options.db).table(tableName).delete().run(conn);
+  }));
 }
 
 let rethinkdbInitialized = false;

@@ -2,6 +2,7 @@ import { equalOps } from 'tests/test-helper';
 import { setupRethinkdb, teardownRethinkdb } from 'tests/support/rethinkdb-hooks';
 import RethinkdbSource from 'orbit-rethinkdb/rethinkdb-source';
 import RethinkdbWebsocketClient from 'npm:rethinkdb-websocket-client';
+const r = RethinkdbWebsocketClient.rethinkdb;
 import chattySchema from 'tests/support/chatty-schema';
 import {
   addRecordOperation,
@@ -9,7 +10,8 @@ import {
   removeRecordOperation,
   replaceRelationshipOperation
 } from 'orbit-common/lib/operations';
-const r = RethinkdbWebsocketClient.rethinkdb;
+
+const skip = QUnit.skip;
 
 let source,
     conn;
@@ -98,19 +100,14 @@ module('Integration - RethinkdbSource', function(hooks) {
       r.table('messages').insert(message).run(conn),
       r.table('chat_rooms').insert(chatRoom).run(conn)
     ])
-    .then(() => {
-      return Promise.all([
-        source.subscribe('message', r.table('messages')),
-        source.subscribe('chatRoom', r.table('chat_rooms')),
-      ]);
-    })
+    .then(() => source.subscribe('message', r.table('messages')))
     .then(() => {
       source.one('didTransform', (transform) => {
         equalOps(transform.operations[0], replaceRelationshipOperation({type: 'message', id: 1}, 'chatRoom', {type: 'chatRoom', id: 2}));
         done();
       });
 
-      r.table('messages').get(1).update({chatRoomKey: 'chatRoom:2'}).run(conn);
+      r.table('messages').get(1).update({chatRoomId: 2}).run(conn);
     });
   });
 });
