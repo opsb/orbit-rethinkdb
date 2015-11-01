@@ -16,10 +16,9 @@ import chattySchema from 'tests/support/chatty-schema';
 import RethinkdbWebsocketClient from 'npm:rethinkdb-websocket-client';
 const r = RethinkdbWebsocketClient.rethinkdb;
 
-let conn,
-    serializer,
-    finder;
-
+let conn;
+let serializer;
+let finder;
 
 module('Integration - RethinkdbSource - Finder', function(hooks) {
   hooks.beforeEach(function({async}) {
@@ -45,13 +44,13 @@ module('Integration - RethinkdbSource - Finder', function(hooks) {
       id: '123',
       type: 'message',
       attributes: {
-        body: 'Hello'
+        body: 'Hello',
       },
       relationships: {
         chatRoom: {
-          data: null
-        }
-      }
+          data: null,
+        },
+      },
     };
 
     r.table('messages')

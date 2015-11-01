@@ -13,8 +13,8 @@ import {
 
 const skip = QUnit.skip;
 
-let source,
-    conn;
+let source;
+let conn;
 
 module('Integration - RethinkdbSource', function(hooks) {
   hooks.beforeEach(function({async}) {
@@ -46,9 +46,9 @@ module('Integration - RethinkdbSource', function(hooks) {
         attributes: {body: message.body},
         relationships: {
           chatRoom: {
-            data: null
-          }
-        }
+            data: null,
+          },
+        },
       }));
       done();
     });
@@ -98,7 +98,7 @@ module('Integration - RethinkdbSource', function(hooks) {
 
     Promise.all([
       r.table('messages').insert(message).run(conn),
-      r.table('chat_rooms').insert(chatRoom).run(conn)
+      r.table('chat_rooms').insert(chatRoom).run(conn),
     ])
     .then(() => source.subscribe('message', r.table('messages')))
     .then(() => {

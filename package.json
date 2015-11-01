@@ -42,6 +42,7 @@
     "broccoli-es6modules": "^0.4.0",
     "broccoli-file-creator": "^1.0.0",
     "broccoli-funnel": "^0.1.6",
+    "broccoli-jscs": "^1.1.0",
     "broccoli-jshint": "^0.5.3",
     "broccoli-merge-trees": "^0.2.3",
     "broccoli-sourcemap-concat": "^0.4.3",

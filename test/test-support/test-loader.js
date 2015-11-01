@@ -11,9 +11,11 @@ setTimeout(function() {
     shouldLoad = false;
 
     if (moduleName.match(/[-_]test$/)) { shouldLoad = true; }
+
     if (!QUnit.urlParams.nojshint && moduleName.match(/\.jshint$/)) { shouldLoad = true; }
 
     if (shouldLoad) { require(moduleName); }
   }
+
   QUnit.start();
 }, 250);
