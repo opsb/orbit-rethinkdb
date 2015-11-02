@@ -55,11 +55,6 @@ var tests = new Funnel('test', {
   destDir: '/tests'
 });
 
-tests = jscs(tests, {
-  esnext: true,
-  enabled: true
-});
-
 var buildExtras = new Funnel('build-support', {
   srcDir: '/',
   destDir: '/',
@@ -118,7 +113,10 @@ var allGlobalized = mergeTrees(Object.keys(globalized).map(function(package) {
 var jshintLib = jshintTree(allLib);
 var jshintTest = jshintTree(tests);
 
-var mainWithTests = mergeTrees([allLib, tests, jshintLib, jshintTest]);
+var jscsLib = jscs(allLib, {esnext: true, enabled: true});
+var jscsTest = jscs(tests, {esnext: true, enabled: true});
+
+var mainWithTests = mergeTrees([allLib, tests, jshintLib, jshintTest, jscsLib, jscsTest]);
 
 mainWithTests = new compileES6Modules(mainWithTests);
 mainWithTests = new transpileES6(mainWithTests);
