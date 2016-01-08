@@ -23,14 +23,14 @@ module('Integration - RethinkdbSource', function(hooks) {
 
     setupRethinkdb().then((_conn) => {
       conn = _conn;
-      source = new RethinkdbSource({schema: chattySchema, conn});
+      source = new RethinkdbSource({ schema: chattySchema, conn, r });
       done();
     });
   });
 
   hooks.afterEach(function({async}) {
     const done = async();
+    source = null;
     teardownRethinkdb().then(done);
   });
 });
-
