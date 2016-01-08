@@ -13,37 +13,15 @@ import {
   addRecordOperation,
   replaceAttributeOperation,
   removeRecordOperation,
-  replaceRelationshipOperation,
+  replaceHasOneOperation,
   operationType,
-  addToRelationshipOperation,
-  removeFromRelationshipOperation
+  addToHasManyOperation,
+  removeFromHasManyOperation,
+  replaceHasManyOperation,
 } from 'orbit-common/lib/operations';
 import Transform from 'orbit/transform';
 import chattySchema from 'tests/support/chatty-schema';
 import RethinkdbWebsocketClient from 'npm:rethinkdb-websocket-client';
-
-function addHasOneOperation(record, relationship, value) {
-  return toOperation(
-    'add',
-    [record.type, record.id, 'relationships', relationship, 'data'],
-    toIdentifier(value.type, value.id)
-  );
-}
-
-function replaceHasOneOperation(record, relationship, value) {
-  return toOperation(
-    'replace',
-    [record.type, record.id, 'relationships', relationship, 'data'],
-    toIdentifier(value.type, value.id)
-  );
-}
-
-function removeHasOneOperation(record, relationship) {
-  return toOperation(
-    'remove',
-    [record.type, record.id, 'relationships', relationship]
-  );
-}
 
 const r = RethinkdbWebsocketClient.rethinkdb;
 
@@ -138,26 +116,6 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
       .then(done);
   });
 
-  test('can add hasOne', function(assert) {
-    const done = assert.async();
-    const chatRoom = buildRecord('chatRoom', {id: 1, name: 'room2'});
-    const message = buildRecord('message', {id: 1, body: 'hello'});
-
-    mapSeries(
-      [
-        addRecordOperation(chatRoom),
-        addRecordOperation(message),
-        addHasOneOperation(message, 'chatRoom', chatRoom),
-      ],
-      operation => transformer.transform(new Transform([operation]))
-    )
-    .then(() => finder.findByType('message'))
-    .then(messages => {
-      assert.equal(messages[0].relationships.chatRoom.data, `chatRoom:${chatRoom.id}`);
-    })
-    .then(done);
-  });
-
   test('can replace hasOne', function(assert) {
     const done = assert.async();
     const chatRoom = buildRecord('chatRoom', {id: 1, name: 'room2'});
@@ -187,8 +145,8 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
       [
         addRecordOperation(chatRoom),
         addRecordOperation(message),
-        addHasOneOperation(message, 'chatRoom', chatRoom),
-        removeHasOneOperation(message, 'chatRoom'),
+        replaceHasOneOperation(message, 'chatRoom', chatRoom),
+        replaceHasOneOperation(message, 'chatRoom', null),
       ],
       operation => transformer.transform(new Transform([operation]))
     )
@@ -208,7 +166,7 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
       [
         addRecordOperation(chatRoom),
         addRecordOperation(message),
-        addToRelationshipOperation(chatRoom, 'messages', message),
+        addToHasManyOperation(chatRoom, 'messages', message),
       ],
       operation => transformer.transform(new Transform([operation]))
     )
@@ -232,7 +190,7 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
         addRecordOperation(message1),
         addRecordOperation(message2),
         addRecordOperation(message3),
-        replaceRelationshipOperation(chatRoom, 'messages', [message2, message3]),
+        replaceHasManyOperation(chatRoom, 'messages', [message2, message3]),
       ],
       operation => transformer.transform(new Transform([operation]))
     )
@@ -258,8 +216,8 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
       [
         addRecordOperation(chatRoom),
         addRecordOperation(message),
-        addToRelationshipOperation(chatRoom, 'messages', message),
-        removeFromRelationshipOperation(chatRoom, 'messages', message),
+        addToHasManyOperation(chatRoom, 'messages', message),
+        removeFromHasManyOperation(chatRoom, 'messages', message),
       ],
       operation => transformer.transform(new Transform([operation]))
     )
