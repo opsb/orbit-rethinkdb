@@ -58,7 +58,7 @@ module('Integration - RethinkdbSource', function(hooks) {
     source
       .liveQuery({ reql: { type: 'message', query: r.table('messages')  } })
       .then(liveQuery => {
-        liveQuery.subscribe(operation => console.log(operation));
+        r.table('messages').get(1).update({body: 'Goodbye'}).run(conn);
 
         liveQuery.take(2).toArray().subscribe(operations => {
           equalOps(operations[1], replaceAttributeOperation({type: 'message', id: 1}, 'body', 'Goodbye'));
@@ -68,7 +68,7 @@ module('Integration - RethinkdbSource', function(hooks) {
       });
 
     r.table('messages').insert(message).run(conn);
-    r.table('messages').get(1).update({body: 'Goodbye'}).run(conn);
+
   });
 
   test('#liveQuery - includes delete record changes', function(assert) {
@@ -78,7 +78,7 @@ module('Integration - RethinkdbSource', function(hooks) {
     source
       .liveQuery({ reql: { type: 'message', query: r.table('messages')  } })
       .then(liveQuery => {
-        liveQuery.subscribe(operation => console.log(operation));
+        r.table('messages').get(1).delete().run(conn);
 
         liveQuery.take(2).toArray().subscribe(operations => {
           equalOps(operations[1], removeRecordOperation({type: 'message', id: 1}));
@@ -88,7 +88,6 @@ module('Integration - RethinkdbSource', function(hooks) {
       });
 
     r.table('messages').insert(message).run(conn);
-    r.table('messages').get(1).delete().run(conn);
   });
 
   test('#liveQuery - includes add hasOne changes', function(assert) {
@@ -99,8 +98,6 @@ module('Integration - RethinkdbSource', function(hooks) {
     source
       .liveQuery({ reql: { type: 'message', query: r.table('messages')  } })
       .then(liveQuery => {
-        liveQuery.subscribe(operation => console.log(operation));
-
         liveQuery.take(2).toArray().subscribe(operations => {
           equalOps(operations[1], replaceHasOneOperation({type: 'message', id: 1}, 'chatRoom', {type: 'chatRoom', id: 2}));
 
