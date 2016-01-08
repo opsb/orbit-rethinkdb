@@ -34,7 +34,7 @@ function createSchema(conn) {
 
 function clearSchema(conn) {
   return Promise.all(tableNames.map((tableName) => {
-    return r.db(options.db).table(tableName).delete().run(conn);
+    return r.db(options.db).table(tableName).delete({durability: 'hard'}).run(conn);
   }));
 }
 

@@ -1,4 +1,5 @@
 import { equalOps } from 'tests/test-helper';
+import Orbit from 'orbit/main';
 import { setupRethinkdb, teardownRethinkdb } from 'tests/support/rethinkdb-hooks';
 import RethinkdbSource from 'orbit-rethinkdb/rethinkdb-source';
 import RethinkdbWebsocketClient from 'npm:rethinkdb-websocket-client';
@@ -8,7 +9,7 @@ import {
   addRecordOperation,
   replaceAttributeOperation,
   removeRecordOperation,
-  replaceRelationshipOperation
+  replaceHasOneOperation
 } from 'orbit-common/lib/operations';
 
 const skip = QUnit.skip;
@@ -32,81 +33,86 @@ module('Integration - RethinkdbSource', function(hooks) {
     teardownRethinkdb().then(done);
   });
 
-  test('can subscribe to add record changes', function(assert) {
+  test('#liveQuery - includes add record changes', function(assert) {
     const done = assert.async();
     const message = {id: 1, body: 'Hello'};
-
-    source.subscribe('message', r.table('messages'));
-
-    source.one('didTransform', (transform) => {
-      equalOps(transform.operations[0], addRecordOperation({
-        __normalized: true,
-        type: 'message',
-        id: message.id,
-        attributes: {body: message.body},
-        relationships: {
-          chatRoom: {
-            data: null,
-          },
-        },
-      }));
-      done();
-    });
+    const normalizedMessage = chattySchema.normalize({ type: 'message', id: message.id, attributes: { body: message.body } });
 
     r.table('messages').insert(message).run(conn);
-  });
 
-  test('can subscribe to replace attribute changes', function(assert) {
-    const done = assert.async();
-    const message = {id: 1, body: 'Hello'};
+    source
+      .liveQuery({ reql: { type: 'message', query: r.table('messages'), }, })
+      .then(liveQuery => {
+        liveQuery.take(1).toArray().subscribe(operations => {
+          equalOps(operations[0], addRecordOperation(normalizedMessage));
 
-    r.table('messages').insert(message).run(conn).then(() => {
-      source.subscribe('message', r.table('messages'));
-
-      source.one('didTransform', (transform) => {
-        equalOps(transform.operations[0], replaceAttributeOperation({type: 'message', id: 1}, 'body', 'Goodbye'));
-        done();
-      });
-
-      r.table('messages').get(1).update({body: 'Goodbye'}).run(conn);
-    });
-
-  });
-
-  test('can subscribe to delete record changes', function(assert) {
-    const done = assert.async();
-    const message = {id: 1, body: 'Hello'};
-
-    r.table('messages').insert(message).run(conn)
-      .then(() => {
-        return source.subscribe('message', r.table('messages'));
-      })
-      .then(() => {
-        source.one('didTransform', (transform) => {
-          equalOps(transform.operations[0], removeRecordOperation({type: 'message', id: 1}));
           done();
         });
-
-        r.table('messages').get(1).delete().run(conn);
       });
   });
 
-  test('can subscribe to add to hasOne changes', function(assert) {
+  test('#liveQuery - includes replace attribute changes', function(assert) {
+    const done = assert.async();
+    const message = {id: 1, body: 'Hello'};
+
+    source
+      .liveQuery({ reql: { type: 'message', query: r.table('messages')  } })
+      .then(liveQuery => {
+        liveQuery.subscribe(operation => console.log(operation));
+
+        liveQuery.take(2).toArray().subscribe(operations => {
+          equalOps(operations[1], replaceAttributeOperation({type: 'message', id: 1}, 'body', 'Goodbye'));
+
+          done();
+        });
+      });
+
+    r.table('messages').insert(message).run(conn);
+    r.table('messages').get(1).update({body: 'Goodbye'}).run(conn);
+  });
+
+  test('#liveQuery - includes delete record changes', function(assert) {
+    const done = assert.async();
+    const message = {id: 1, body: 'Hello'};
+
+    source
+      .liveQuery({ reql: { type: 'message', query: r.table('messages')  } })
+      .then(liveQuery => {
+        liveQuery.subscribe(operation => console.log(operation));
+
+        liveQuery.take(2).toArray().subscribe(operations => {
+          equalOps(operations[1], removeRecordOperation({type: 'message', id: 1}));
+
+          done();
+        });
+      });
+
+    r.table('messages').insert(message).run(conn);
+    r.table('messages').get(1).delete().run(conn);
+  });
+
+  test('#liveQuery - includes add hasOne changes', function(assert) {
     const done = assert.async();
     const message = {id: 1, body: 'Hello'};
     const chatRoom = {id: 2, name: 'The forum'};
 
-    Promise.all([
+    source
+      .liveQuery({ reql: { type: 'message', query: r.table('messages')  } })
+      .then(liveQuery => {
+        liveQuery.subscribe(operation => console.log(operation));
+
+        liveQuery.take(2).toArray().subscribe(operations => {
+          equalOps(operations[1], replaceHasOneOperation({type: 'message', id: 1}, 'chatRoom', {type: 'chatRoom', id: 2}));
+
+          done();
+        });
+      });
+
+    Orbit.Promise.all([
       r.table('messages').insert(message).run(conn),
       r.table('chat_rooms').insert(chatRoom).run(conn),
     ])
-    .then(() => source.subscribe('message', r.table('messages')))
     .then(() => {
-      source.one('didTransform', (transform) => {
-        equalOps(transform.operations[0], replaceRelationshipOperation({type: 'message', id: 1}, 'chatRoom', {type: 'chatRoom', id: 2}));
-        done();
-      });
-
       r.table('messages').get(1).update({chatRoomId: 2}).run(conn);
     });
   });

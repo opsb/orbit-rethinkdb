@@ -1,4 +1,5 @@
 import Orbit from 'orbit/main';
+QUnit.config.testTimeout = 5000;
 
 Orbit.Promise = Promise;
 Orbit.pluralize = function(original) {
