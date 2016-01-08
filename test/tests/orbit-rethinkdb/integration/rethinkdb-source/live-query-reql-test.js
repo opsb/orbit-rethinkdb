@@ -42,7 +42,7 @@ module('Integration - RethinkdbSource - #liveQuery - reql', function(hooks) {
     r.table('messages').insert(message).run(conn);
 
     source
-      .liveQuery({ reql: { type: 'message', query: r.table('messages'), }, })
+      .liveQuery({ reql: r.table('messages'), })
       .then(liveQuery => {
         liveQuery.take(1).toArray().subscribe(operations => {
           equalOps(operations[0], addRecordOperation(normalizedMessage));
@@ -57,7 +57,7 @@ module('Integration - RethinkdbSource - #liveQuery - reql', function(hooks) {
     const message = {id: 1, body: 'Hello'};
 
     source
-      .liveQuery({ reql: { type: 'message', query: r.table('messages')  } })
+      .liveQuery({ reql: r.table('messages') })
       .then(liveQuery => {
         r.table('messages').get(1).update({body: 'Goodbye'}).run(conn);
 
@@ -77,7 +77,7 @@ module('Integration - RethinkdbSource - #liveQuery - reql', function(hooks) {
     const message = {id: 1, body: 'Hello'};
 
     source
-      .liveQuery({ reql: { type: 'message', query: r.table('messages')  } })
+      .liveQuery({ reql: r.table('messages') })
       .then(liveQuery => {
         r.table('messages').get(1).delete().run(conn);
 
@@ -97,7 +97,7 @@ module('Integration - RethinkdbSource - #liveQuery - reql', function(hooks) {
     const chatRoom = {id: 2, name: 'The forum'};
 
     source
-      .liveQuery({ reql: { type: 'message', query: r.table('messages')  } })
+      .liveQuery({ reql: r.table('messages') })
       .then(liveQuery => {
         liveQuery.take(2).toArray().subscribe(operations => {
           equalOps(operations[1], replaceHasOneOperation({type: 'message', id: 1}, 'chatRoom', {type: 'chatRoom', id: 2}));
