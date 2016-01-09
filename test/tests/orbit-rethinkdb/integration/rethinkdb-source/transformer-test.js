@@ -159,8 +159,8 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
 
   test('can add to hasMany', function(assert) {
     const done = assert.async();
-    const chatRoom = buildRecord('chatRoom', {id: 1, name: 'room2'});
-    const message = buildRecord('message', {id: 1, body: 'hello'});
+    const chatRoom = buildRecord('chatRoom', {id: 'chatRoom1', name: 'room2'});
+    const message = buildRecord('message', {id: 'message1', body: 'hello2'});
 
     mapSeries(
       [
@@ -179,10 +179,10 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
 
   test('can replace hasMany', function(assert) {
     const done = assert.async();
-    const chatRoom = buildRecord('chatRoom', {id: 1, name: 'room2'});
-    const message1 = buildRecord('message', {id: 1, body: 'hello', chatRoomId: 1});
-    const message2 = buildRecord('message', {id: 2, body: 'hola', chatRoomId: 1});
-    const message3 = buildRecord('message', {id: 3, body: 'bienvenidos'});
+    const chatRoom = buildRecord('chatRoom', {id: 'chatRoom1', name: 'room2'});
+    const message1 = buildRecord('message', {id: 'message1', body: 'hello', chatRoomId: 'chatRoom1'});
+    const message2 = buildRecord('message', {id: 'message2', body: 'hola', chatRoomId: 'chatRoom1'});
+    const message3 = buildRecord('message', {id: 'message3', body: 'bienvenidos'});
 
     mapSeries(
       [
@@ -200,9 +200,9 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
       const messagesById = {};
       messages.forEach((message) => messagesById[message.id] = message);
 
-      assert.equal(messagesById[1].relationships.chatRoom.data, null);
-      assert.equal(messagesById[2].relationships.chatRoom.data, 'chatRoom:1');
-      assert.equal(messagesById[3].relationships.chatRoom.data, 'chatRoom:1');
+      assert.equal(messagesById.message1.relationships.chatRoom.data, null);
+      assert.equal(messagesById.message2.relationships.chatRoom.data, 'chatRoom:chatRoom1');
+      assert.equal(messagesById.message3.relationships.chatRoom.data, 'chatRoom:chatRoom1');
     })
     .then(done);
   });
