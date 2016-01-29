@@ -52,4 +52,57 @@ module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
         });
       });
   });
+
+  module('relatedRecord', function() {
+    test('includes existing member', function(assert) {
+      const done = assert.async();
+      const message = chattySchema.normalize({ type: 'message', id: 'message1', attributes: { body: 'body1' }, });
+      const chatRoom = chattySchema.normalize({ type: 'chatRoom', id: 'chatRoom1', attributes: { name: 'room1' } });
+
+      Orbit.Promise.all([
+        source.transform(new Transform([addRecordOperation(message)])),
+        source.transform(new Transform([addRecordOperation(chatRoom)])),
+      ])
+      .then(() =>
+        source.transform(new Transform([replaceHasOneOperation(message, 'chatRoom', chatRoom)]))
+      )
+      .then(() => {
+        source
+          .liveQuery({ oql: oqe('relatedRecord', 'message', 'message1', 'chatRoom'), })
+          .then(liveQuery => {
+            liveQuery.take(1).toArray().subscribe(operations => {
+              assert.equal(operationType(operations[0]), 'addRecord');
+              assert.equal(operations[0].value.id, chatRoom.id);
+
+              done();
+            });
+          });
+      });
+    });
+
+    test('adds new member', function(assert) {
+      const done = assert.async();
+      const message = chattySchema.normalize({ type: 'message', id: 'message1', attributes: { body: 'body1' }, });
+      const chatRoom = chattySchema.normalize({ type: 'chatRoom', id: 'chatRoom1', attributes: { name: 'room1' } });
+
+      Orbit.Promise.all([
+        source.transform(new Transform([addRecordOperation(message)])),
+        source.transform(new Transform([addRecordOperation(chatRoom)])),
+      ])
+      .then(() => {
+        source
+          .liveQuery({ oql: oqe('relatedRecord', 'message', 'message1', 'chatRoom'), })
+          .tap(() => source.transform(new Transform([replaceHasOneOperation(message, 'chatRoom', chatRoom)])))
+          .then(liveQuery => {
+            debugger
+            liveQuery.take(1).toArray().subscribe(operations => {
+              assert.equal(operationType(operations[0]), 'addRecord');
+              assert.equal(operations[0].value.id, chatRoom.id);
+
+              done();
+            });
+          });
+      });
+    });
+  });
 });

@@ -2,8 +2,10 @@ import RethinkdbWebsocketClient from 'npm:rethinkdb-websocket-client';
 const r = RethinkdbWebsocketClient.rethinkdb;
 
 const tableNames = [
+  'alter_egos',
   'messages',
   'chat_rooms',
+  'users',
 ];
 
 const options = {
