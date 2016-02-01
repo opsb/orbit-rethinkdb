@@ -11,7 +11,7 @@ import {
   removeRecordOperation,
   replaceHasOneOperation
 } from 'orbit-common/lib/operations';
-import { queryExpression as oqe } from 'orbit-common/oql/expressions';
+import { queryExpression as oqe } from 'orbit/query/expression';
 import Transform from 'orbit/transform';
 
 const skip = QUnit.skip;

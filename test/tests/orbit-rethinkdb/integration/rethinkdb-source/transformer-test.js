@@ -101,15 +101,15 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
 
   test('can add record', function(assert) {
     const done = assert.async();
-    const message = buildRecord('message', {id: 1, body: 'hello'});
-    const addRecordTransform = new Transform([addRecordOperation(message)]);
+    const user = buildRecord('user', {id: 'user1', name: 'Jim'});
+    const addRecordTransform = new Transform([addRecordOperation(user)]);
 
     transform(
-      addRecordOperation(message)
+      addRecordOperation(user)
     )
-    .then(() => finder.findByType('message'))
-    .then((messages) => {
-      assert.deepEqual(messages[0], message);
+    .then(() => finder.findByType('user'))
+    .then((users) => {
+      assert.deepEqual(users[0], user);
     })
     .finally(done);
   });
@@ -252,6 +252,31 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
       .finally(done);
     });
 
+    test('replace with empty array', function(assert) {
+      const done = assert.async();
+      const chatRoom = buildRecord('chatRoom', {id: 'chatRoom1', name: 'room2'});
+      const message1 = buildRecord('message', {id: 'message1', body: 'hello', chatRoomId: 'chatRoom1'});
+      const message2 = buildRecord('message', {id: 'message2', body: 'hola', chatRoomId: 'chatRoom1'});
+      const message3 = buildRecord('message', {id: 'message3', body: 'bienvenidos'});
+
+      transform(
+        addRecordOperation(chatRoom),
+        addRecordOperation(message1),
+        addRecordOperation(message2),
+        addRecordOperation(message3),
+        replaceHasManyOperation(chatRoom, 'messages', [message2, message3]),
+        replaceHasManyOperation(chatRoom, 'messages', [])
+      )
+      .then(() => fetchRecordsFromTables('messages', 'chat_rooms'))
+      .then(({chatRoom1, message1, message2, message3}) => {
+        assert.deepEqual(chatRoom1.messageIds, {});
+        assert.equal(message1.chatRoomId, null);
+        assert.equal(message2.chatRoomId, null);
+        assert.equal(message3.chatRoomId, null);
+      })
+      .finally(done);
+    });
+
     test('remove from', function(assert) {
       const done = assert.async();
       const chatRoom = buildRecord('chatRoom', {id: 'chatRoom1', name: 'room2'});
@@ -334,6 +359,35 @@ module('Integration - RethinkdbSource - Transformer', function(hooks) {
         assert.deepEqual(chatRoom1.userIds, {}, 'removed from chatRoom1');
         assert.deepEqual(chatRoom2.userIds, {user1: true, user2: true}, 'user1 added to chatRoom2');
         assert.deepEqual(chatRoom3.userIds, {user1: true}, 'add user1 to chatRoom3');
+      })
+      .finally(done);
+    });
+
+    test('replace with an empty array', function(assert) {
+      const done = assert.async();
+      const user1 = buildRecord('user', {id: 'user1', name: 'Jim'});
+      const user2 = buildRecord('user', {id: 'user2', name: 'Mark'});
+      const chatRoom1 = buildRecord('chatRoom', {id: 'chatRoom1', name: 'room1'});
+      const chatRoom2 = buildRecord('chatRoom', {id: 'chatRoom2', name: 'room2'});
+      const chatRoom3 = buildRecord('chatRoom', {id: 'chatRoom3', name: 'room3'});
+
+      transform(
+        addRecordOperation(user1),
+        addRecordOperation(user2),
+        addRecordOperation(chatRoom1),
+        addRecordOperation(chatRoom2),
+        addRecordOperation(chatRoom3),
+        addToHasManyOperation(user1, 'chatRooms', chatRoom1),
+        addToHasManyOperation(user2, 'chatRooms', chatRoom2),
+        replaceHasManyOperation(user1, 'chatRooms', [chatRoom2, chatRoom3]),
+        replaceHasManyOperation(user1, 'chatRooms', [])
+      )
+      .then(() => fetchRecordsFromTables('users', 'chat_rooms'))
+      .then(({user1, user2, chatRoom1, chatRoom2, chatRoom3}) => {
+        assert.deepEqual(user1.chatRoomIds, {}, 'cleared user\'s chatRooms');
+        assert.deepEqual(chatRoom1.userIds, {}, 'removed user from chatRoom1');
+        assert.deepEqual(chatRoom2.userIds, {user2: true}, 'removed user from chatRoom2');
+        assert.deepEqual(chatRoom3.userIds, {}, 'removed user from chatRoom3');
       })
       .finally(done);
     });

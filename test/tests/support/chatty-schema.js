@@ -26,7 +26,7 @@ export default new Schema({
       },
       relationships: {
         messages: {type: 'hasMany', model: 'message', inverse: 'chatRoom'},
-        users: {type: 'hasMany', model: 'user', inverse: 'users'},
+        users: {type: 'hasMany', model: 'user', inverse: 'chatRooms'},
       },
     },
     alterEgo: {

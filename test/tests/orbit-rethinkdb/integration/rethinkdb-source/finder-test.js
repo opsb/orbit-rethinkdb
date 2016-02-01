@@ -16,6 +16,8 @@ import chattySchema from 'tests/support/chatty-schema';
 import RethinkdbWebsocketClient from 'npm:rethinkdb-websocket-client';
 const r = RethinkdbWebsocketClient.rethinkdb;
 
+const skip = QUnit.skip;
+
 let conn;
 let serializer;
 let finder;
@@ -37,7 +39,7 @@ module('Integration - RethinkdbSource - Finder', function(hooks) {
     teardownRethinkdb().then(done);
   });
 
-  test('can find records', function(assert) {
+  skip('can find records', function(assert) {
     const done = assert.async();
     const expectedMessage = {
       __normalized: true,
