@@ -1,6 +1,10 @@
 import Orbit from 'orbit/main';
+import './support/rsvp-extension';
+import { Promise as RSVPPromise } from 'rsvp';
 
-Orbit.Promise = Promise;
+QUnit.config.testTimeout = 10000;
+
+Orbit.Promise = RSVPPromise;
 Orbit.pluralize = function(original) {
   return original.match(/s$/) ? original : original + 's';
 };

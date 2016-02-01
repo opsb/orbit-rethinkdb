@@ -136,7 +136,8 @@ var vendor = concat('bower_components', {
     'jquery/dist/jquery.js',
     'rsvp/rsvp.js',
     'orbit.js/orbit.amd.js',
-    'orbit.js/orbit-common.amd.js'],
+    'orbit.js/orbit-common.amd.js',
+    'rxjs/dist/rx.all.js'],
   outputFile: '/assets/vendor.js'
 });
 

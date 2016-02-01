@@ -13,7 +13,8 @@
   ],
   "ignore": [],
   "dependencies": {
-    "orbit.js": "orbitjs/orbit-builds#master"
+    "orbit.js": "orbitjs/orbit-builds#master",
+    "rxjs": "~4.0.7"
   },
   "devDependencies": {
     "jquery": "~1.11.1",
