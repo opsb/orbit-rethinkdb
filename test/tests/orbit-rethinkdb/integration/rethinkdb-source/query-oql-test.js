@@ -23,7 +23,7 @@ function buildRecord(...args) {
   return source._serializer.deserialize(...args);
 }
 
-module('Integration - RethinkdbSource - #query - oql', function(hooks) {
+module('Integration - RethinkdbSource - #query', function(hooks) {
   hooks.beforeEach(function({async}) {
     const done = async();
 
@@ -48,7 +48,7 @@ module('Integration - RethinkdbSource - #query - oql', function(hooks) {
     r.table('messages').insert(message).run(conn);
 
     source
-      .query({ oql: oqe('recordsOfType', 'message'), })
+      .query(oqe('recordsOfType', 'message'))
       .then(results => {
         assert.deepEqual(results, { message1: normalizedMessage });
         done();
@@ -66,26 +66,24 @@ module('Integration - RethinkdbSource - #query - oql', function(hooks) {
       source.transform(new Transform([addRecordOperation(messageB)])),
     ])
     .then(() => {
-      const query = {
-        oql:
-          oqe(
-            'filter',
-            oqe('recordsOfType', 'message'),
-            oqe('or',
-              oqe('and',
-                oqe('equal', oqe('get', 'attributes/body'), 'body1'),
-                oqe('equal', oqe('get', 'attributes/author'), 'jim')
-              ),
-              oqe('and',
-                oqe('equal', oqe('get', 'attributes/body'), 'body2'),
-                oqe('equal', oqe('get', 'attributes/author'), 'mark'),
-                oqe('equal', oqe('get', 'attributes/body'), 'body2')
-              ),
-              oqe('or'), // 'or' operator can accept any number of args including zero
-              oqe('and') // 'and' operator can accept any number of args including zero
-            )
-          ),
-      };
+      const query =
+        oqe(
+          'filter',
+          oqe('recordsOfType', 'message'),
+          oqe('or',
+            oqe('and',
+              oqe('equal', oqe('get', 'attributes/body'), 'body1'),
+              oqe('equal', oqe('get', 'attributes/author'), 'jim')
+            ),
+            oqe('and',
+              oqe('equal', oqe('get', 'attributes/body'), 'body2'),
+              oqe('equal', oqe('get', 'attributes/author'), 'mark'),
+              oqe('equal', oqe('get', 'attributes/body'), 'body2')
+            ),
+            oqe('or'), // 'or' operator can accept any number of args including zero
+            oqe('and') // 'and' operator can accept any number of args including zero
+          )
+        );
 
       source
         .query(query)
@@ -108,7 +106,7 @@ module('Integration - RethinkdbSource - #query - oql', function(hooks) {
     ])
     .then(() => {
       source
-        .query({ oql: oqe('record', 'message', 'messageA'), })
+        .query(oqe('record', 'message', 'messageA'))
         .then(results => {
           assert.deepEqual(results, { [messageA.id]: messageA });
           done();
@@ -128,8 +126,8 @@ module('Integration - RethinkdbSource - #query - oql', function(hooks) {
     .then(() => source.transform(new Transform([replaceHasOneOperation(message, 'chatRoom', chatRoom)])))
     .then(() => {
       Orbit.Promise.all([
-        source.query({ oql: oqe('relatedRecords', 'chatRoom', 'chatRoom1', 'messages'), }),
-        source.query({ oql: oqe('record', 'message', 'message1') }),
+        source.query(oqe('relatedRecords', 'chatRoom', 'chatRoom1', 'messages')),
+        source.query(oqe('record', 'message', 'message1')),
       ])
       .then(([results, expectedResults]) => {
         assert.deepEqual(results, expectedResults);
@@ -150,8 +148,8 @@ module('Integration - RethinkdbSource - #query - oql', function(hooks) {
     .then(() => source.transform(new Transform([replaceHasOneOperation(message, 'chatRoom', chatRoom)])))
     .then(() => {
       Orbit.Promise.all([
-        source.query({ oql: oqe('relatedRecord', 'message', 'message1', 'chatRoom'), }),
-        source.query({ oql: oqe('record', 'chatRoom', 'chatRoom1') }),
+        source.query(oqe('relatedRecord', 'message', 'message1', 'chatRoom')),
+        source.query(oqe('record', 'chatRoom', 'chatRoom1')),
       ])
       .then(([results, expectedResults]) => {
         assert.deepEqual(results, expectedResults);

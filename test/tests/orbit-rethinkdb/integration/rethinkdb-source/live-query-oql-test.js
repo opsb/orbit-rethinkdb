@@ -20,7 +20,7 @@ const skip = QUnit.skip;
 let source;
 let conn;
 
-module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
+module('Integration - RethinkdbSource - #liveQuery', function(hooks) {
   hooks.beforeEach(function({async}) {
     const done = async();
 
@@ -47,7 +47,7 @@ module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
       r.table('messages').insert(message).run(conn);
 
       source
-        .liveQuery({ oql: oqe('recordsOfType', 'message'), })
+        .liveQuery(oqe('recordsOfType', 'message'))
         .then(liveQuery => {
           liveQuery.take(1).toArray().subscribe(operations => {
             equalOps(operations[0], addRecordOperation(normalizedMessage));
@@ -70,7 +70,7 @@ module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
       ])
       .then(() => {
         source
-          .liveQuery({ oql: oqe('recordsOfType', 'users'), })
+          .liveQuery(oqe('recordsOfType', 'users'))
           .then(liveQuery => {
             liveQuery.take(1).toArray().subscribe(operations => {
               assert.deepEqual(operations[0].value.relationships.chatRooms.data, {'chatRoom:chatRoom1': true});
@@ -87,7 +87,7 @@ module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
       const done = assert.async();
 
       source
-        .liveQuery({ oql: oqe('recordsOfType', 'message'), })
+        .liveQuery(oqe('recordsOfType', 'message'))
         .then(liveQuery => {
           r.table('messages').insert(message).run(conn);
 
@@ -105,7 +105,7 @@ module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
       r.table('messages').insert(message).run(conn);
 
       source
-        .liveQuery({ oql: oqe('recordsOfType', 'message'), })
+        .liveQuery(oqe('recordsOfType', 'message'))
         .then(liveQuery => {
           r.table('messages').get(message.id).delete().run(conn);
 
@@ -125,13 +125,12 @@ module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
       const normalizedMessage = chattySchema.normalize({ type: 'message', id: message.id, attributes: { body: message.body } });
 
       source
-        .liveQuery({
-          oql:
-            oqe('filter',
-              oqe('recordsOfType', 'message'),
-              oqe('equal',
-                oqe('get', 'attributes/body'),
-                'Hello')), })
+        .liveQuery(
+          oqe('filter',
+            oqe('recordsOfType', 'message'),
+            oqe('equal',
+              oqe('get', 'attributes/body'),
+              'Hello')))
 
         .then(liveQuery => {
           r.table('messages').insert(message).run(conn);
@@ -152,13 +151,12 @@ module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
       r.table('messages').insert(message).run(conn);
 
       source
-        .liveQuery({
-          oql:
-            oqe('filter',
-              oqe('recordsOfType', 'message'),
-              oqe('equal',
-                oqe('get', 'attributes/body'),
-                'Goodbye')), })
+        .liveQuery(
+          oqe('filter',
+            oqe('recordsOfType', 'message'),
+            oqe('equal',
+              oqe('get', 'attributes/body'),
+              'Goodbye')))
 
         .then(liveQuery => {
           r.table('messages').get(message.id).update({body: 'Goodbye'}).run(conn);
@@ -180,13 +178,12 @@ module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
       r.table('messages').insert(message).run(conn);
 
       source
-        .liveQuery({
-          oql:
-            oqe('filter',
-              oqe('recordsOfType', 'message'),
-              oqe('equal',
-                oqe('get', 'attributes/body'),
-                'Hello')), })
+        .liveQuery(
+          oqe('filter',
+            oqe('recordsOfType', 'message'),
+            oqe('equal',
+              oqe('get', 'attributes/body'),
+              'Hello')))
 
         .then(liveQuery => {
           r.table('messages').get(message.id).update({body: 'Goodbye'}).run(conn);
@@ -214,7 +211,7 @@ module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
       })
       .then(() => {
         source
-          .liveQuery({ oql: oqe('relatedRecords', 'chatRoom', 'chatRoom1', 'messages'), })
+          .liveQuery(oqe('relatedRecords', 'chatRoom', 'chatRoom1', 'messages'))
           .then(liveQuery => {
             liveQuery.take(1).toArray().subscribe(operations => {
               assert.equal(operationType(operations[0]), 'addRecord');
@@ -237,7 +234,7 @@ module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
       ])
       .then(() => {
         source
-          .liveQuery({ oql: oqe('relatedRecords', 'chatRoom', 'chatRoom1', 'messages'), })
+          .liveQuery(oqe('relatedRecords', 'chatRoom', 'chatRoom1', 'messages'))
           .tap(() => source.transform(new Transform([replaceHasOneOperation(message, 'chatRoom', chatRoom)])))
           .then(liveQuery => {
             liveQuery.take(1).toArray().subscribe(operations => {
@@ -264,7 +261,7 @@ module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
       )
       .then(() => {
         source
-          .liveQuery({ oql: oqe('relatedRecords', 'chatRoom', 'chatRoom1', 'messages'), })
+          .liveQuery(oqe('relatedRecords', 'chatRoom', 'chatRoom1', 'messages'))
           .tap(() => source.transform(new Transform([replaceHasOneOperation(message, 'chatRoom', null)])))
           .then(liveQuery => {
             liveQuery.take(2).toArray().subscribe(operations => {
@@ -291,7 +288,7 @@ module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
       )
       .then(() => {
         source
-          .liveQuery({ oql: oqe('relatedRecords', 'chatRoom', 'chatRoom1', 'messages'), })
+          .liveQuery(oqe('relatedRecords', 'chatRoom', 'chatRoom1', 'messages'))
           .tap(() => source.transform(new Transform([replaceAttributeOperation(message, 'body', 'body2')])))
           .then(liveQuery => {
             liveQuery.take(2).toArray().subscribe(operations => {
@@ -319,7 +316,7 @@ module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
       )
       .then(() => {
         source
-          .liveQuery({ oql: oqe('relatedRecord', 'message', 'message1', 'chatRoom'), })
+          .liveQuery(oqe('relatedRecord', 'message', 'message1', 'chatRoom'))
           .then(liveQuery => {
             liveQuery.take(1).toArray().subscribe(operations => {
               assert.equal(operationType(operations[0]), 'addRecord');
@@ -342,7 +339,7 @@ module('Integration - RethinkdbSource - #liveQuery - oql', function(hooks) {
       ])
       .then(() => {
         source
-          .liveQuery({ oql: oqe('relatedRecord', 'message', 'message1', 'chatRoom'), })
+          .liveQuery(oqe('relatedRecord', 'message', 'message1', 'chatRoom'))
           .tap(() => source.transform(new Transform([replaceHasOneOperation(message, 'chatRoom', chatRoom)])))
           .then(liveQuery => {
             liveQuery.take(1).toArray().subscribe(operations => {
